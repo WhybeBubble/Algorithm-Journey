@@ -1,5 +1,5 @@
 /**
- * @file 001_Two_Sum.cpp
+ * @file 0001_Two_Sum.cpp
  * @brief 1. 两数之和
  * @link https://leetcode.cn/problems/two-sum/
  * 
@@ -8,33 +8,31 @@
  * @space_complexity O(N) - 需要一个哈希表存 N 个元素
  * 
  * @note 核心思路：
- * 不要用双层 for 循环去找。
  * 准备一个 unordered_map<数值, 下标>。
  * 遍历数组，对于当前数字 x，去 map 里找有没有 (target - x)。
  * 如果有，直接返回下标；如果没有，把自己存进 map 里，继续往后找。
+ * 时间复杂度 O(n),空间复杂度O(n)
  */
 
 #include <vector>
 #include <unordered_map>
 
-using namespace std; // 刷题时为了手速，这里可以写 using namespace std
+using namespace std; 
 
 class Solution {
 public:
     vector<int> twoSum(vector<int>& nums, int target) {
-        unordered_map<int, int> numMap;
+        unordered_map<int, int> idx;//创建一个空的哈希表
         
-        for (int i = 0; i < nums.size(); i++) {
-            int complement = target - nums[i];
-            
-            // 如果在 map 中找到了互补的数
-            if (numMap.find(complement) != numMap.end()) {
-                return {numMap[complement], i};
+        for (int i = 0; i < nums.size(); i++) {  //边界条件不可漏
+            auto it = idx.find(target - nums[i]);
+            if(it != idx.end())
+            {
+                return {it->second,i};
             }
-            // 没找到，就把自己存进去
-            numMap[nums[i]] = i;
+            idx[nums[i]] = i; 
         }
-        
-        return {};
+        return {};//返回兜底！
     }
 };
+
