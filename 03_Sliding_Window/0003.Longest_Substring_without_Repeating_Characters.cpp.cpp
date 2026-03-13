@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 #include <unordered_map>
 #include <algorithm>
 
@@ -56,3 +57,40 @@ public:
         return maxLength;
     }
 };
+
+
+/*
+*进阶解法，采用128位字符数组
+*没有哈希计算：unordered_map 每次存取都要把 char 送进哈希函数算一遍，
+*数组直接 charIdxMap[currentChar]，因为 C++ 会隐式地把 char 转成它的 ASCII 整数值（0~127），这相当于直接寻址，CPU 极度舒适。
+*没有内存碎片/动态分配：unordered_map 内部是由链表/桶组成的，节点是在堆上动态 new 出来的。
+*而 vector<int>(128, -1) 是一块极其小且连续的内存，完美命中 CPU Cache（缓存命中率 100%）。
+*/
+class Solution1{
+
+public:
+    int lengthOfLongestSubstring(string s) {
+        int len = s.length();
+        if (len < 2) return len;
+
+        vector<int> charVector(128,-1);
+
+        int maxLength = 0;
+        int left = 0;
+
+        for(int right = 0; right < len; right++)
+        {
+            char currentChar = s[right];
+
+            if(charVector[currentChar] != -1)
+            {
+                left = max(left,charVector[currentChar] + 1);
+            }
+
+            charVector[currentChar] = right;
+            maxLength = max(maxLength,right - left + 1);
+        }
+        return maxLength;
+    }
+};
+
