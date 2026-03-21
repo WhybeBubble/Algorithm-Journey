@@ -1,14 +1,12 @@
 /**
- * @file 138_Copy_List_Hash_Map.cpp
- * @brief 138. 随机链表的复制 (哈希表法)
+ * @file 138_Copy_List_with_Random_Pointer.cpp
+ * @brief 138. 随机链表的复制
+ * @link https://leetcode.cn/problems/copy-list-with-random-pointer/
  * 
- * @algorithm 哈希表映射 (Hash Map Mapping)
- * @time_complexity O(N) - 遍历链表两次。
- * @space_complexity O(N) - 需要一个哈希表来存储原节点到新节点的映射。
+ * @algorithm 节点分裂法 / 交织法 (Node Splitting / Interweaving)
  * 
- * @note 工业级思考：
- * 这是典型的“空间换逻辑清晰度”的解法。虽然多了 O(N) 空间，
- * 但代码极难出错，且不破坏原链表的只读性。
+ * @time_complexity O(N) - 遍历链表三次。
+ * @space_complexity O(1) - 除了返回所需的新链表节点，不使用额外的哈希表空间。
  */
 
 // Definition for a Node.
@@ -25,44 +23,58 @@ public:
     }
 };
 
-#include <unordered_map>
-using namespace std;
-
-
 class Solution {
 public:
     Node* copyRandomList(Node* head) {
         if (head == nullptr) return nullptr;
 
-        // 1. 创建映射表：<原节点指针, 新节点指针>
-        // 侯捷提示：这里存的是 8 字节的内存地址作为 Key
-        std::unordered_map<Node*, Node*> nodeMap;
-
-        // --------------------------------------------------
-        // 第一遍遍历：只创建“肉体”（节点本身），不连“灵魂”（指针）
-        // --------------------------------------------------
+        // ==========================================
+        // 阶段 1：克隆节点并交织挂载
+        // 原链表：A -> B -> C
+        // 现链表：A -> A' -> B -> B' -> C -> C'
+        // ==========================================
         Node* curr = head;
         while (curr != nullptr) {
-            nodeMap[curr] = new Node(curr->val);
-            curr = curr->next;
+            Node* clone = new Node(curr->val);
+            clone->next = curr->next;
+            curr->next = clone;
+            curr = clone->next; // 移动到下一个原节点
         }
 
-        // --------------------------------------------------
-        // 第二遍遍历：根据映射表，连接新链表的 next 和 random
-        // --------------------------------------------------
+        // ==========================================
+        // 阶段 2：处理克隆节点的 random 指针
+        // ==========================================
         curr = head;
         while (curr != nullptr) {
-            // 新节点的 next = 原节点下家的映射
-            nodeMap[curr]->next = nodeMap[curr->next];
-            
-            // 新节点的 random = 原节点随机指向的映射
-            nodeMap[curr]->random = nodeMap[curr->random];
-            
-            curr = curr->next;
+            Node* clone = curr->next;
+            // 如果原节点的 random 不为空，克隆节点的 random 就是原节点 random 的 next
+            if (curr->random != nullptr) {
+                clone->random = curr->random->next;
+            }
+            curr = clone->next; // 跨过克隆节点，移动到下一个原节点
         }
 
-        // 返回原链表头节点所对应的新节点地址
-        return nodeMap[head];
+        // ==========================================
+        // 阶段 3：物理拆分（极其关键：必须恢复原链表！）
+        // ==========================================
+        curr = head;
+        Node* cloneHead = head->next;
+        Node* cloneCurr = cloneHead;
+
+        while (curr != nullptr) {
+            // 恢复原链表
+            curr->next = curr->next->next;
+            
+            // 链接新链表
+            if (cloneCurr->next != nullptr) {
+                cloneCurr->next = cloneCurr->next->next;
+            }
+
+            // 同步后移
+            curr = curr->next;
+            cloneCurr = cloneCurr->next;
+        }
+
+        return cloneHead;
     }
 };
-
