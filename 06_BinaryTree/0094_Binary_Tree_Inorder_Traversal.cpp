@@ -39,3 +39,40 @@ private:
         traversal(curr->right, res); // 右
     }
 };
+
+/**
+ * @algorithm 迭代法 (Iteration using std::stack)
+ * @note 核心逻辑：
+ * 1. 模拟系统栈：先一路向左钻到底，沿途所有节点入栈。
+ * 2. 触底回溯：从栈中弹出节点（相当于从左孩子回到了根），记录值。
+ * 3. 转向：去处理右子树。
+ */
+
+#include <stack>
+
+class Solution {
+public:
+    vector<int> inorderTraversal(TreeNode* root) {
+        vector<int> result;
+        stack<TreeNode*> st;
+        TreeNode* curr = root;
+
+        // 只要当前节点不为空，或者栈里还有存货，就不能停
+        while (curr != nullptr || !st.empty()) {
+            // 步骤 1: 一路向左钻到底
+            while (curr != nullptr) {
+                st.push(curr);     // 压栈（保存现场）
+                curr = curr->left; // 往左走
+            }
+
+            // 步骤 2: 此时 curr 为空，说明左边到头了，该弹栈了
+            curr = st.top();
+            st.pop();
+            result.push_back(curr->val); // 处理“根”
+
+            // 步骤 3: 转向右边
+            curr = curr->right;
+        }
+        return result;
+    }
+};
