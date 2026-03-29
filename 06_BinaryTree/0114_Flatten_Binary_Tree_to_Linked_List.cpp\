@@ -66,3 +66,28 @@ public:
         }
     }
 };
+
+
+// class Solution {
+// public:
+//     // 这是一个“全局”状态，记录上一个处理完的节点（即链表中的后继节点）
+//     // 侯捷提示：在类成员中定义，使其在所有递归层级间共享状态
+//     TreeNode* last = nullptr;
+
+//     void flatten(TreeNode* root) {
+//         if (root == nullptr) return;
+
+//         // 1. 【关键】：先递归右子树，再递归左子树
+//         // 物理意义：先去处理链表的最末端
+//         flatten(root->right);
+//         flatten(root->left);
+
+//         // 2. 【回溯阶段】：此时 last 已经指向了当前节点在前序遍历中的后继
+//         // 比如处理到 5 时，last 指向 6
+//         root->right = last;
+//         root->left = nullptr; // 必须斩断左手，防止形成环或歧义
+
+//         // 3. 【更新状态】：当前节点变成了“上一个处理完的节点”，供它的前驱使用
+//         last = root;
+//     }
+// };
